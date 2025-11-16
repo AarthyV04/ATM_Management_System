@@ -1,146 +1,149 @@
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
-public class OptionMenu {
-    Scanner menuInput = new Scanner(System.in);
-    DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
-    HashMap<Integer, Integer> data = new HashMap<>();
-    int customerNumber;
-    int pinNumber;
-    double checkingBalance = 1000.00;
-    double savingBalance = 1500.00;
-    public static void main(String[] args) throws IOException {
-        OptionMenu obj = new OptionMenu();
-        obj.getLogin();
-    }
-    public void getLogin() throws IOException {
-        int x = 1;
-        do {
-            try {
-                data.put(9446243, 6321);
-                data.put(8988470, 9012);
-                data.put(5637113, 4092);
-                System.out.println("Welcome to the ATM Project!");
-                System.out.print("Enter Your Customer Number: ");
-                setCustomerNumber(menuInput.nextInt());
-                System.out.print("Enter Your Pin Number: ");
-                setPinNumber(menuInput.nextInt());
-            } catch (Exception e) {
-                System.out.println("\nInvalid characters(s). Only numbers.\n");
-                menuInput.nextLine(); // clear buffer
-                x = 2;
-            }
-            for (Map.Entry<Integer, Integer> entry : data.entrySet()) {
-                if (entry.getKey() == getCustomerNumber() && entry.getValue() == getPinNumber()) {
-                    getAccountType();
-                    return;
-                }
-            }
-            System.out.println("\nWrong Customer Number or Pin Number.\n");
 
-        } while (x == 1);
+public class OptionMenu {
+
+    Scanner input = new Scanner(System.in);
+    DecimalFormat moneyFormat = new DecimalFormat("'$'###,##0.00");
+
+    // Stores multiple accounts
+    HashMap<Integer, Account> accounts = new HashMap<>();
+
+    public OptionMenu() {
+        // Preloaded users
+        addAccount(9446243, 6321);
+        addAccount(8988470, 9012);
+        addAccount(5637113, 4092);
+        addAccount(9342764, 9087);
     }
-    public void getAccountType() {
-        System.out.println("Select the Account you want to access:");
-        System.out.println("Type 1 - Checking Account");
-        System.out.println("Type 2 - Saving Account");
-        System.out.println("Type 3 - Exit");
-        System.out.print("Choice: ");
-        int selection = menuInput.nextInt();
-        switch (selection) {
-            case 1 -> getChecking();
-            case 2 -> getSaving();
-            case 3 -> System.out.println("Thank you for using this ATM... Byee..");
-            default -> {
-                System.out.println("\nInvalid Choice.\n");
-                getAccountType();
+
+    private void addAccount(int customerNumber, int pinNumber) {
+        Account acc = new Account();
+        acc.setCustomerNumber(customerNumber);
+        acc.setPinNumber(pinNumber);
+        accounts.put(customerNumber, acc);
+    }
+
+    public void getLogin() throws IOException {
+        System.out.println("\nWelcome to the ATM Project!");
+
+        while (true) {
+            try {
+                System.out.print("Enter Customer Number: ");
+                int customerNum = input.nextInt();
+
+                System.out.print("Enter PIN: ");
+                int pin = input.nextInt();
+
+                if (accounts.containsKey(customerNum) &&
+                    accounts.get(customerNum).getPinNumber() == pin) {
+
+                    getAccountType(accounts.get(customerNum));
+                    break;
+                } else {
+                    System.out.println("\nWrong Customer Number or PIN.\n");
+                }
+
+            } catch (Exception e) {
+                System.out.println("\nInvalid Input. Enter only numbers.\n");
+                input.nextLine();
             }
         }
     }
-    public void getChecking() {
-        System.out.println("Checking Account:");
-        System.out.println("1 - View Balance");
-        System.out.println("2 - Withdraw Funds");
-        System.out.println("3 - Deposit Funds");
-        System.out.println("4 - Exit");
+
+    public void getAccountType(Account acc) {
+        System.out.println("\nSelect the Account:");
+        System.out.println("1 - Checking Account");
+        System.out.println("2 - Saving Account");
+        System.out.println("3 - Exit");
         System.out.print("Choice: ");
-        int selection = menuInput.nextInt();
+
+        int selection = input.nextInt();
+
         switch (selection) {
-            case 1 -> {
-                System.out.println("Checking Account Balance: " + moneyFormat.format(checkingBalance));
-                getAccountType();
-            }
-            case 2 -> {
-                System.out.print("Amount to withdraw: ");
-                double amount = menuInput.nextDouble();
-                if (amount <= checkingBalance) {
-                    checkingBalance -= amount;
-                } else {
-                    System.out.println("Insufficient Funds.");
-                }
-                getAccountType();
-            }
-            case 3 -> {
-                System.out.print("Amount to deposit: ");
-                double amount = menuInput.nextDouble();
-                checkingBalance += amount;
-                getAccountType();
-            }
-            case 4 -> System.out.println("Thank you for using this ATM... Byee..");
+            case 1 -> getChecking(acc);
+            case 2 -> getSaving(acc);
+            case 3 -> System.out.println("Thank you for using the ATM.\n");
             default -> {
                 System.out.println("Invalid choice.");
-                getChecking();
+                getAccountType(acc);
             }
         }
     }
-    public void getSaving() {
-        System.out.println("Saving Account:");
+
+    public void getChecking(Account acc) {
+        System.out.println("\nChecking Account:");
         System.out.println("1 - View Balance");
-        System.out.println("2 - Withdraw Funds");
-        System.out.println("3 - Deposit Funds");
+        System.out.println("2 - Withdraw");
+        System.out.println("3 - Deposit");
         System.out.println("4 - Exit");
         System.out.print("Choice: ");
-        int selection = menuInput.nextInt();
-        switch (selection) {
+
+        int choice = input.nextInt();
+
+        switch (choice) {
             case 1 -> {
-                System.out.println("Saving Account Balance: " + moneyFormat.format(savingBalance));
-                getAccountType();
+                System.out.println("Balance: " + moneyFormat.format(acc.getCheckingBalance()));
+                getChecking(acc);
             }
             case 2 -> {
-                System.out.print("Amount to withdraw: ");
-                double amount = menuInput.nextDouble();
-                if (amount <= savingBalance) {
-                    savingBalance -= amount;
-                } else {
-                    System.out.println("Insufficient Funds.");
-                }
-                getAccountType();
+                System.out.print("Enter withdraw amount: ");
+                double amt = input.nextDouble();
+
+                if (acc.withdrawChecking(amt))
+                    System.out.println("Withdrawal successful!");
+                else
+                    System.out.println("Insufficient Funds!");
+
+                getChecking(acc);
             }
             case 3 -> {
-                System.out.print("Amount to deposit: ");
-                double amount = menuInput.nextDouble();
-                savingBalance += amount;
-                getAccountType();
+                System.out.print("Enter deposit amount: ");
+                acc.depositChecking(input.nextDouble());
+                System.out.println("Deposit successful!");
+                getChecking(acc);
             }
-            case 4 -> System.out.println("Thank you for using this ATM... Byee..");
-            default -> {
-                System.out.println("Invalid choice.");
-                getSaving();
-            }
+            case 4 -> getAccountType(acc);
+            default -> getChecking(acc);
         }
     }
-    public int getCustomerNumber() {
-        return customerNumber;
-    }
-    public void setCustomerNumber(int customerNumber) {
-        this.customerNumber = customerNumber;
-    }
-    public int getPinNumber() {
-        return pinNumber;
-    }
-    public void setPinNumber(int pinNumber) {
-        this.pinNumber = pinNumber;
+
+    public void getSaving(Account acc) {
+        System.out.println("\nSaving Account:");
+        System.out.println("1 - View Balance");
+        System.out.println("2 - Withdraw");
+        System.out.println("3 - Deposit");
+        System.out.println("4 - Exit");
+        System.out.print("Choice: ");
+
+        int choice = input.nextInt();
+
+        switch (choice) {
+            case 1 -> {
+                System.out.println("Balance: " + moneyFormat.format(acc.getSavingBalance()));
+                getSaving(acc);
+            }
+            case 2 -> {
+                System.out.print("Enter withdraw amount: ");
+                double amt = input.nextDouble();
+
+                if (acc.withdrawSaving(amt))
+                    System.out.println("Withdrawal successful!");
+                else
+                    System.out.println("Insufficient Funds!");
+
+                getSaving(acc);
+            }
+            case 3 -> {
+                System.out.print("Enter deposit amount: ");
+                acc.depositSaving(input.nextDouble());
+                System.out.println("Deposit successful!");
+                getSaving(acc);
+            }
+            case 4 -> getAccountType(acc);
+            default -> getSaving(acc);
+        }
     }
 }
